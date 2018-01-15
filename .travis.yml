@@ -1,0 +1,18 @@
+---
+language: rust
+sudo: false
+
+cache: cargo
+
+os:
+  - linux
+  - osx
+
+rust:
+  - nightly
+  - stable
+
+script:
+  - if [ `uname` = "Linux" ]; then curl -sL https://raw.githubusercontent.com/vmchale/tomlcheck/master/sh/check | sh -s rustfmt.toml ; fi
+  - cargo build
+  - cargo doc

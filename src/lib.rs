@@ -1,9 +1,13 @@
+extern crate colored;
+
 use std::env::home_dir;
 use std::path::PathBuf;
 use std::fs::File;
 use std::io::prelude::*;
 use std::fs::create_dir_all;
+use colored::*;
 
+/// Set up man pages given the manpage contents and an executable name.
 pub fn setup_manpages(man: &str, exe_name: &str) {
 
     let home_dir = match home_dir() { Some(p) => p, None => PathBuf::from("."), };
@@ -22,7 +26,7 @@ pub fn setup_manpages(man: &str, exe_name: &str) {
                 contents_saved.push_str("\n#manpath updated by cli-setup\nexport MANPATH=~/.local/share:$MANPATH");
                 let _ = match File::create(&bashrc) {
                     Ok(mut file) => { file.write(contents_saved.as_bytes()).expect("File write failed") ; },
-                    _ => (),
+                    _ => eprintln!("{}: failed to open file at {}, not install manual pages", "Warning".yellow(), &bashrc.display()),
                 };
             }}
         _ => (),
