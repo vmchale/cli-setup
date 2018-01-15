@@ -25,18 +25,26 @@ pub fn setup_manpages(man: &str, exe_name: &str) {
     let _ = match File::open(&bashrc) {
         Ok(mut f) => {
             let mut contents = String::new();
-            f.read_to_string(&mut contents).expect("File read failed");
+            match f.read_to_string(&mut contents) {
+                Ok(_) => (),
+                Err(_) => eprintln!("{}: failed to open file, not installing manual pages", "Warning".yellow()),
+            }
             let mut contents_saved = contents.clone();
 
             let should_write: bool = contents.lines().fold(true, |acc, next| acc && (next != "\n#manpath updated by cli-setup") );
 
             if !should_write {
                 contents_saved.push_str("\n#manpath updated by cli-setup\nexport MANPATH=~/.local/share:$MANPATH");
-                let _ = match File::create(&bashrc) {
-                    Ok(mut file) => { file.write(contents_saved.as_bytes()).expect("File write failed") ; },
+                match File::create(&bashrc) {
+                    Ok(mut file) => { 
+                        match file.write(contents_saved.as_bytes()) {
+                            Ok(_) => (),
+                            Err(_) => eprintln!("{}: failed to open file, not installing manual pages", "Warning".yellow()),
+                        }},
                     _ => eprintln!("{}: failed to open file at {}, not installing manual pages", "Warning".yellow(), &bashrc.display()),
+                    };
                 };
-            }}
+            }
         _ => (),
     };
 
