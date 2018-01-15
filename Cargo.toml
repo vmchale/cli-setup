@@ -4,6 +4,7 @@ version = "0.1.1"
 authors = ["Vanessa McHale <vamchale@gmail.com>"]
 exclude = [ ".gitignore" ]
 license-file = "LICENSE"
+readme = "README.md"
 description = "Helper functions for installing manpages alongside a command-line tool."
 
 [dependencies]
