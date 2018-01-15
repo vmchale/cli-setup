@@ -7,7 +7,15 @@ use std::io::prelude::*;
 use std::fs::create_dir_all;
 use colored::*;
 
-/// Set up man pages given the manpage contents and an executable name.
+/// Set up given the manpage contents and an executable name. This function is intended to be
+/// called inside the project `build.rs`.
+///
+/// ```
+/// use cli_setup::*;
+///
+/// pub const MANPAGE: &'static str = include_str!("man/executable.1");
+/// setup_manpages(MANPAGE, "executable");
+/// ```
 pub fn setup_manpages(man: &str, exe_name: &str) {
 
     let home_dir = match home_dir() { Some(p) => p, None => PathBuf::from("."), };
@@ -26,7 +34,7 @@ pub fn setup_manpages(man: &str, exe_name: &str) {
                 contents_saved.push_str("\n#manpath updated by cli-setup\nexport MANPATH=~/.local/share:$MANPATH");
                 let _ = match File::create(&bashrc) {
                     Ok(mut file) => { file.write(contents_saved.as_bytes()).expect("File write failed") ; },
-                    _ => eprintln!("{}: failed to open file at {}, not install manual pages", "Warning".yellow(), &bashrc.display()),
+                    _ => eprintln!("{}: failed to open file at {}, not installing manual pages", "Warning".yellow(), &bashrc.display()),
                 };
             }}
         _ => (),
@@ -47,12 +55,12 @@ pub fn setup_manpages(man: &str, exe_name: &str) {
     let pre_f = File::create(man_path);
     match pre_f {
         Ok(mut f) => {
-    let res = f.write(man.as_bytes());
-    match res {
-        Ok(_) => (),
-        Err(_) => (),
-    }
+            let res = f.write(man.as_bytes());
+            match res {
+                Ok(_) => (),
+                Err(_) => eprintln!("{}: failed to open file, not installing manual pages", "Warning".yellow()),
+            }
         },
-        Err(_) => (),
+        Err(_) => eprintln!("{}: failed to open file, not installing manual pages", "Warning".yellow()),
     }
 }
