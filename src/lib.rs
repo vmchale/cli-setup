@@ -32,7 +32,7 @@ pub fn setup_thefuck() {
         let _ = match File::create(&config_path) {
             Ok(mut f) => {
                 let mut thefuck_string = THEFUCK_STRING.to_string();
-                let _ = match f.read_to_string(&mut thefuck_string) {
+                let _ = match f.write(thefuck_string.as_bytes()) {
                     Ok(_) => (),
                     _ => eprintln!("{}: file write failed", "Warning".yellow()),
                 };
