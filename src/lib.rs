@@ -8,6 +8,12 @@ use std::io::prelude::*;
 use std::path::PathBuf;
 
 /// Set up rules for [fuck](https://pypi.python.org/pypi/thefuck/) that work with `clap-rs`.
+///
+/// ```
+/// use cli_setup::*;
+///
+/// setup_thefuck();
+/// ```
 pub fn setup_thefuck() {
     pub const THEFUCK_STRING: &'static str = include_str!("../py/clap-rs.py");
     let home_dir = match home_dir() {
@@ -21,8 +27,9 @@ pub fn setup_thefuck() {
     config_path.push("rules");
     let cfg_path_exists = config_path.exists() && config_path.is_dir();
     if cfg_path_exists {
-        config_path.push("clap-rs.py");
-        let _ = match File::open(&config_path) {
+        config_path.push("clap-rs");
+        config_path.set_extension("py");
+        let _ = match File::create(&config_path) {
             Ok(mut f) => {
                 let mut thefuck_string = THEFUCK_STRING.to_string();
                 let _ = match f.read_to_string(&mut thefuck_string) {
