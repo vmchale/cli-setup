@@ -1,6 +1,6 @@
 [package]
 name = "cli-setup"
-version = "0.2.1-alpha.0"
+version = "0.2.1"
 authors = ["Vanessa McHale <vamchale@gmail.com>"]
 exclude = [ ".gitignore" ]
 license-file = "LICENSE"
