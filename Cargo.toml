@@ -9,3 +9,4 @@ description = "Helper functions for installing manpages alongside a command-line
 
 [dependencies]
 colored = "1.6.0"
+dirs = "1.0"

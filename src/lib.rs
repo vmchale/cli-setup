@@ -1,9 +1,10 @@
 extern crate colored;
+extern crate dirs;
 
 use colored::*;
-use std::env::home_dir;
-use std::fs::File;
+use dirs::home_dir;
 use std::fs::create_dir_all;
+use std::fs::File;
 use std::io::prelude::*;
 use std::path::PathBuf;
 
@@ -15,7 +16,7 @@ use std::path::PathBuf;
 /// setup_thefuck();
 /// ```
 pub fn setup_thefuck() {
-    pub const THEFUCK_STRING: &'static str = include_str!("../py/clap-rs.py");
+    pub const THEFUCK_STRING: &str = include_str!("../py/clap-rs.py");
     let home_dir = match home_dir() {
         Some(p) => p,
         None => PathBuf::from("."),
@@ -29,30 +30,29 @@ pub fn setup_thefuck() {
     if cfg_path_exists {
         config_path.push("clap-rs");
         config_path.set_extension("py");
-        let _ = match File::create(&config_path) {
-            Ok(mut f) => {
-                let mut thefuck_string = THEFUCK_STRING.to_string();
-                let _ = match f.write(thefuck_string.as_bytes()) {
-                    Ok(_) => (),
-                    _ => eprintln!("{}: file write failed", "Warning".yellow()),
-                };
-            }
-            _ => eprintln!(
+        if let Ok(mut f) = File::create(&config_path) {
+            let mut thefuck_string = THEFUCK_STRING.to_string();
+            match f.write(thefuck_string.as_bytes()) {
+                Ok(_) => (),
+                _ => eprintln!("{}: file write failed", "Warning".yellow()),
+            };
+        } else {
+            eprintln!(
                 "{}: failed to open file at {}",
                 "Warning".yellow(),
                 &config_path.display()
-            ),
+            );
         };
     }
 }
 
-/// Set up given the manpage contents and an executable name. This function is intended to be
-/// called inside the project `build.rs`.
+/// Set up given the manpage contents and an executable name. This function is
+/// intended to be called inside the project `build.rs`.
 ///
 /// ```
 /// use cli_setup::*;
 ///
-/// pub const MANPAGE: &'static str = include_str!("man/executable.1");
+/// pub const MANPAGE: &str = include_str!("man/executable.1");
 /// setup_manpages(MANPAGE, "executable");
 /// ```
 pub fn setup_manpages(man: &str, exe_name: &str) {
@@ -63,43 +63,40 @@ pub fn setup_manpages(man: &str, exe_name: &str) {
 
     let mut bashrc = home_dir.clone();
     bashrc.push(".bashrc");
-    let _ = match File::open(&bashrc) {
-        Ok(mut f) => {
-            let mut contents = String::new();
-            match f.read_to_string(&mut contents) {
-                Ok(_) => (),
-                Err(_) => eprintln!(
-                    "{}: failed to open file, not installing manual pages",
-                    "Warning".yellow()
-                ),
-            }
-            let mut contents_saved = contents.clone();
-
-            let should_write: bool = contents.lines().fold(true, |acc, next| {
-                acc && (next != "\n#manpath updated by cli-setup")
-            });
-
-            if !should_write {
-                contents_saved.push_str(
-                    "\n#manpath updated by cli-setup\nexport MANPATH=~/.local/share:$MANPATH",
-                );
-                match File::create(&bashrc) {
-                    Ok(mut file) => match file.write(contents_saved.as_bytes()) {
-                        Ok(_) => (),
-                        Err(_) => eprintln!(
-                            "{}: failed to open file, not installing manual pages",
-                            "Warning".yellow()
-                        ),
-                    },
-                    _ => eprintln!(
-                        "{}: failed to open file at {}, not installing manual pages",
-                        "Warning".yellow(),
-                        &bashrc.display()
-                    ),
-                };
-            };
+    if let Ok(mut f) = File::open(&bashrc) {
+        let mut contents = String::new();
+        match f.read_to_string(&mut contents) {
+            Ok(_) => (),
+            Err(_) => eprintln!(
+                "{}: failed to open file, not installing manual pages",
+                "Warning".yellow()
+            ),
         }
-        _ => (),
+        let mut contents_saved = contents.clone();
+
+        let should_write: bool = contents
+            .lines()
+            .all(|line| line != "\n#manpath updated by cli-setup");
+
+        if !should_write {
+            contents_saved.push_str(
+                "\n#manpath updated by cli-setup\nexport MANPATH=~/.local/share:$MANPATH",
+            );
+            match File::create(&bashrc) {
+                Ok(mut file) => match file.write(contents_saved.as_bytes()) {
+                    Ok(_) => (),
+                    Err(_) => eprintln!(
+                        "{}: failed to open file, not installing manual pages",
+                        "Warning".yellow()
+                    ),
+                },
+                _ => eprintln!(
+                    "{}: failed to open file at {}, not installing manual pages",
+                    "Warning".yellow(),
+                    &bashrc.display()
+                ),
+            };
+        };
     };
 
     let mut man_dir = home_dir.clone();
