@@ -22,12 +22,11 @@ pub fn setup_thefuck() {
         None => PathBuf::from("."),
     };
 
-    let mut config_path = home_dir.clone();
+    let mut config_path = home_dir;
     config_path.push(".config");
     config_path.push("thefuck");
     config_path.push("rules");
-    let cfg_path_exists = config_path.exists() && config_path.is_dir();
-    if cfg_path_exists {
+    if config_path.exists() && config_path.is_dir() {
         config_path.push("clap-rs");
         config_path.set_extension("py");
         if let Ok(mut f) = File::create(&config_path) {
@@ -72,15 +71,15 @@ pub fn setup_manpages(man: &str, exe_name: &str) {
                 "Warning".yellow()
             ),
         }
-        let mut contents_saved = contents.clone();
-
         let should_write: bool = contents
             .lines()
             .all(|line| line != "\n#manpath updated by cli-setup");
 
+        let mut contents_saved = contents;
+
         if !should_write {
             contents_saved.push_str(
-                "\n#manpath updated by cli-setup\nexport MANPATH=~/.local/share:$MANPATH",
+                "\n#manpath updated by cli-setup\nexport MANPATH=\"$HOME\"/.local/share:$MANPATH",
             );
             match File::create(&bashrc) {
                 Ok(mut file) => match file.write(contents_saved.as_bytes()) {
@@ -99,14 +98,14 @@ pub fn setup_manpages(man: &str, exe_name: &str) {
         };
     };
 
-    let mut man_dir = home_dir.clone();
+    let mut man_dir = home_dir;
     man_dir.push(".local");
     man_dir.push("share");
     man_dir.push("man");
     man_dir.push("man1");
-    let mut man_path = man_dir.clone();
 
-    let _ = create_dir_all(man_dir);
+    let _ = create_dir_all(&man_dir);
+    let mut man_path = man_dir;
 
     man_path.push(exe_name);
     man_path.set_extension("1");
