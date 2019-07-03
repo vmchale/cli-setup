@@ -8,5 +8,5 @@ readme = "README.md"
 description = "Helper functions for installing manpages alongside a command-line tool."
 
 [dependencies]
-colored = "1.6.0"
-dirs = "1.0"
+colored = "1.8.0"
+dirs = "2.0"
