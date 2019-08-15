@@ -30,7 +30,7 @@ pub fn setup_thefuck() {
         config_path.push("clap-rs");
         config_path.set_extension("py");
         if let Ok(mut f) = File::create(&config_path) {
-            let mut thefuck_string = THEFUCK_STRING.to_string();
+            let thefuck_string = THEFUCK_STRING.to_string();
             match f.write(thefuck_string.as_bytes()) {
                 Ok(_) => (),
                 _ => eprintln!("{}: file write failed", "Warning".yellow()),
