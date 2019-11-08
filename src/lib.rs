@@ -45,23 +45,14 @@ pub fn setup_thefuck() {
     }
 }
 
-/// Set up given the manpage contents and an executable name. This function is
-/// intended to be called inside the project `build.rs`.
-///
-/// ```
-/// use cli_setup::*;
-///
-/// pub const MANPAGE: &str = include_str!("man/executable.1");
-/// setup_manpages(MANPAGE, "executable");
-/// ```
-pub fn setup_manpages(man: &str, exe_name: &str) {
+pub fn write_shell_config(shell_cfg: &str) {
     let home_dir = match home_dir() {
         Some(p) => p,
         None => PathBuf::from("."),
     };
 
-    let mut bashrc = home_dir.clone();
-    bashrc.push(".bashrc");
+    let mut bashrc = home_dir;
+    bashrc.push(shell_cfg);
     if let Ok(mut f) = File::open(&bashrc) {
         let mut contents = String::new();
         match f.read_to_string(&mut contents) {
@@ -97,6 +88,25 @@ pub fn setup_manpages(man: &str, exe_name: &str) {
             };
         };
     };
+}
+
+/// Set up given the manpage contents and an executable name. This function is
+/// intended to be called inside the project `build.rs`.
+///
+/// ```
+/// use cli_setup::*;
+///
+/// pub const MANPAGE: &str = include_str!("man/executable.1");
+/// setup_manpages(MANPAGE, "executable");
+/// ```
+pub fn setup_manpages(man: &str, exe_name: &str) {
+    let home_dir = match home_dir() {
+        Some(p) => p,
+        None => PathBuf::from("."),
+    };
+
+    write_shell_config(".bashrc");
+    write_shell_config(".zshrc");
 
     let mut man_dir = home_dir;
     man_dir.push(".local");
