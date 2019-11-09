@@ -51,9 +51,9 @@ pub fn write_shell_config(shell_cfg: &str) {
         None => PathBuf::from("."),
     };
 
-    let mut bashrc = home_dir;
-    bashrc.push(shell_cfg);
-    if let Ok(mut f) = File::open(&bashrc) {
+    let mut cfg_file = home_dir;
+    cfg_file.push(shell_cfg);
+    if let Ok(mut f) = File::open(&cfg_file) {
         let mut contents = String::new();
         match f.read_to_string(&mut contents) {
             Ok(_) => (),
@@ -72,18 +72,17 @@ pub fn write_shell_config(shell_cfg: &str) {
             contents_saved.push_str(
                 "\n#manpath updated by cli-setup\nexport MANPATH=\"$HOME\"/.local/share:$MANPATH",
             );
-            match File::create(&bashrc) {
+            match File::create(&cfg_file) {
                 Ok(mut file) => match file.write(contents_saved.as_bytes()) {
                     Ok(_) => (),
-                    Err(_) => eprintln!(
-                        "{}: failed to open file, not installing manual pages",
-                        "Warning".yellow()
-                    ),
+                    Err(_) => {
+                        eprintln!("{}: failed to open file, not modifying", "Warning".yellow())
+                    }
                 },
                 _ => eprintln!(
-                    "{}: failed to open file at {}, not installing manual pages",
+                    "{}: failed to open file at {}, modifying",
                     "Warning".yellow(),
-                    &bashrc.display()
+                    &cfg_file.display()
                 ),
             };
         };
